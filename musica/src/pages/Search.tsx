@@ -1,29 +1,55 @@
 import { useEffect, useRef, useState } from "react";
-import { searchAll } from "../api/jamendo";
+import { hasJamendo, searchAll } from "../api/jamendo";
 import { SearchIcon } from "../components/Icons";
 import { AlbumCard, ArtistCard, Shelf } from "../components/Shelf";
 import { Empty, ErrorMessage, Loading } from "../components/Status";
 import { TrackList } from "../components/TrackList";
 import { GENRES } from "../genres";
+import { useLocal } from "../local/LocalContext";
 import { Link, navigate } from "../router/router";
 import { useAsync } from "../useAsync";
 
-function Results({ query }: { query: string }) {
+function LocalResults({ query }: { query: string }) {
+  const local = useLocal();
+  const text = query.toLowerCase();
+  const tracks = local.tracks.filter((track) =>
+    `${track.title} ${track.artist} ${track.album}`
+      .toLowerCase()
+      .includes(text),
+  );
+  if (tracks.length === 0) return null;
+  return (
+    <section className="section">
+      <h2>Suas músicas</h2>
+      <TrackList tracks={tracks.slice(0, 20)} showStageInfo />
+    </section>
+  );
+}
+
+function JamendoResults({
+  query,
+  hasLocal,
+}: {
+  query: string;
+  hasLocal: boolean;
+}) {
   const { data, error, loading, retry } = useAsync(
     `search:${query}`,
     (signal) => searchAll(query, signal),
   );
-  if (loading) return <Loading label="Buscando…" />;
+  if (loading) return <Loading label="Buscando no Jamendo…" />;
   if (error) return <ErrorMessage error={error} onRetry={retry} />;
   if (!data) return null;
   if (data.tracks.length + data.albums.length + data.artists.length === 0) {
-    return <Empty>Nada encontrado para “{query}”. Tente outra palavra.</Empty>;
+    return hasLocal ? null : (
+      <Empty>Nada encontrado para “{query}”. Tente outra palavra.</Empty>
+    );
   }
   return (
     <>
       {data.tracks.length > 0 && (
         <section className="section">
-          <h2>Músicas</h2>
+          <h2>{hasLocal ? "No Jamendo" : "Músicas"}</h2>
           <TrackList tracks={data.tracks} />
         </section>
       )}
@@ -40,6 +66,34 @@ function Results({ query }: { query: string }) {
             <AlbumCard key={album.id} album={album} />
           ))}
         </Shelf>
+      )}
+    </>
+  );
+}
+
+function Results({ query }: { query: string }) {
+  const local = useLocal();
+  const text = query.toLowerCase();
+  const hasLocal = local.tracks.some((track) =>
+    `${track.title} ${track.artist} ${track.album}`
+      .toLowerCase()
+      .includes(text),
+  );
+  return (
+    <>
+      <LocalResults query={query} />
+      {hasJamendo() ? (
+        <JamendoResults query={query} hasLocal={hasLocal} />
+      ) : (
+        !hasLocal && (
+          <Empty>
+            Nada encontrado em suas músicas para “{query}”.{" "}
+            <Link to="/configuracoes" className="strong-link">
+              Conecte o Jamendo
+            </Link>{" "}
+            para buscar no catálogo.
+          </Empty>
+        )
       )}
     </>
   );
@@ -95,6 +149,10 @@ export function Search({ initialQuery }: { initialQuery: string }) {
       </div>
       {query ? (
         <Results query={query} />
+      ) : !hasJamendo() ? (
+        <Empty>
+          Busque entre as suas músicas pelo título, artista ou álbum.
+        </Empty>
       ) : (
         <section className="section">
           <h2>Navegar por gênero</h2>

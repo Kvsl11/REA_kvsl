@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import type { Album, Artist, Track } from "../api/types";
+import { useLocal } from "../local/LocalContext";
 import { usePlayer } from "../player/PlayerContext";
+import { ArtistLink } from "./TrackList";
 import { Link } from "../router/router";
 import { Cover } from "./Cover";
 import { PauseIcon, PlayIcon } from "./Icons";
@@ -37,7 +39,8 @@ export function TrackCard({
   index: number;
 }) {
   const player = usePlayer();
-  const track = tracks[index]!;
+  const local = useLocal();
+  const track = local.resolve(tracks[index]!);
   const isCurrent = player.track?.id === track.id;
   const isPlaying = isCurrent && player.playing;
   return (
@@ -60,9 +63,7 @@ export function TrackCard({
       <p className="card-title" title={track.title}>
         {track.title}
       </p>
-      <Link to={`/artista/${track.artistId}`} className="card-subtitle">
-        {track.artist}
-      </Link>
+      <ArtistLink track={track} className="card-subtitle" />
     </div>
   );
 }

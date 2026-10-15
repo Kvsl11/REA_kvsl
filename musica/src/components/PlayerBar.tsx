@@ -4,6 +4,7 @@ import { useLibrary } from "../library/LibraryContext";
 import { usePlayer } from "../player/PlayerContext";
 import { Link, navigate } from "../router/router";
 import { Cover } from "./Cover";
+import { ArtistLink } from "./TrackList";
 import {
   ChevronDownIcon,
   HeartIcon,
@@ -88,7 +89,9 @@ function Controls({ large = false }: { large?: boolean }) {
         onClick={player.togglePlay}
         disabled={!player.track}
       >
-        {player.playing ? (
+        {player.loading && !player.playing ? (
+          <span className="spinner spinner-small" aria-hidden="true" />
+        ) : player.playing ? (
           <PauseIcon size={size - 2} />
         ) : (
           <PlayIcon size={size - 2} />
@@ -185,9 +188,13 @@ function NowPlaying({ onClose }: { onClose: () => void }) {
       <div className="now-playing-info">
         <div>
           <h2>{track.title}</h2>
-          <Link to={`/artista/${track.artistId}`} onClick={onClose}>
-            {track.artist}
-          </Link>
+          {track.artistId ? (
+            <Link to={`/artista/${track.artistId}`} onClick={onClose}>
+              {track.artist}
+            </Link>
+          ) : (
+            <span className="now-playing-artist">{track.artist}</span>
+          )}
         </div>
         <LikeButton />
       </div>
@@ -227,12 +234,7 @@ export function PlayerBar() {
                 >
                   {track.title}
                 </button>
-                <Link
-                  to={`/artista/${track.artistId}`}
-                  className="player-artist"
-                >
-                  {track.artist}
-                </Link>
+                <ArtistLink track={track} className="player-artist" />
               </div>
               <LikeButton />
             </>

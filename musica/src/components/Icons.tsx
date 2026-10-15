@@ -70,3 +70,32 @@ export const CloseIcon = icon(
 );
 export const BackIcon = icon("M15.4 4.6 8 12l7.4 7.4-1.4 1.4L5.2 12 14 3.2z");
 export const ChevronDownIcon = icon("M5.4 8.6 12 15.2l6.6-6.6L20 10l-8 8-8-8z");
+export const MicIcon = icon(
+  "M12 2a3.5 3.5 0 0 0-3.5 3.5v6a3.5 3.5 0 0 0 7 0v-6A3.5 3.5 0 0 0 12 2zm-7 9.5h2a5 5 0 0 0 10 0h2a7 7 0 0 1-6 6.93V21h3v2H8v-2h3v-2.57A7 7 0 0 1 5 11.5z",
+);
+export const ChartIcon = icon(
+  "M3 20h18v2H3zm2-9h3v7H5zm5.5-5h3v12h-3zM16 9h3v9h-3z",
+);
+export const UploadIcon = icon(
+  "M12 3l5 5-1.4 1.4L13 6.8V16h-2V6.8L8.4 9.4 7 8zM4 15h2v4h12v-4h2v6H4z",
+);
+export const SettingsIcon = icon(
+  "M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.4-2.5 1a7.4 7.4 0 0 0-1.7-1L14.9 3h-4l-.4 3a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.4L6.4 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1c.5.4 1.1.7 1.7 1l.4 3h4l.4-3c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.4zM12.9 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z",
+);
+export const ClockIcon = icon(
+  "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm-1 3v6l5 3 1-1.7-4-2.3V7z",
+);
+export const EditIcon = icon(
+  "M4 17.2V20h2.8l9.4-9.4-2.8-2.8zM19.7 7.1a1 1 0 0 0 0-1.4l-1.4-1.4a1 1 0 0 0-1.4 0l-1.2 1.2 2.8 2.8z",
+);
+export const ArrowUpIcon = icon(
+  "M12 5l7 7-1.4 1.4-4.6-4.6V20h-2V8.8l-4.6 4.6L5 12z",
+);
+export const ArrowDownIcon = icon(
+  "M12 19l-7-7 1.4-1.4 4.6 4.6V4h2v11.2l4.6-4.6L19 12z",
+);
+export const StopIcon = icon("M6 6h12v12H6z");
+export const CoffeeIcon = icon(
+  "M3 7h14v6a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6zm14 1h1.5a3 3 0 0 1 0 6H17v-2h1.5a1 1 0 0 0 0-2H17zM3 21h16v2H3zM8 1h2v4H8zm4 0h2v4h-2z",
+);
+export const CheckIcon = icon("M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z");

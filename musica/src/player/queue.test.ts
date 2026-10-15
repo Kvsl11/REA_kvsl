@@ -4,6 +4,7 @@ import * as Q from "./queue";
 
 const track = (id: string): Track => ({
   id,
+  source: "jamendo",
   title: `Música ${id}`,
   artist: "Artista",
   artistId: "1",

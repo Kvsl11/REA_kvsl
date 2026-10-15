@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { clearClientId, clientIdFromEnv, getClientId } from "./api/jamendo";
-import { BackIcon } from "./components/Icons";
+import { getClientId } from "./api/jamendo";
+import { EditorProvider } from "./components/EditorContext";
+import { BackIcon, SettingsIcon } from "./components/Icons";
 import { PlayerBar } from "./components/PlayerBar";
 import { BottomNav, Sidebar } from "./components/Sidebar";
 import { Empty } from "./components/Status";
 import { ToastProvider } from "./components/Toast";
 import { LibraryProvider } from "./library/LibraryContext";
+import { LocalProvider } from "./local/LocalContext";
 import { AlbumPage } from "./pages/Album";
 import { ArtistPage } from "./pages/Artist";
 import { GenrePage } from "./pages/Genre";
@@ -16,19 +18,44 @@ import {
   PlaylistPage,
   QueuePage,
 } from "./pages/Library";
+import { LiveShowPage } from "./pages/LiveShow";
+import { LocalMusicPage } from "./pages/LocalMusic";
 import { Search } from "./pages/Search";
-import { Setup } from "./pages/Setup";
+import { SettingsPage } from "./pages/Settings";
+import { Setup, setupDone } from "./pages/Setup";
+import { ShowReportPage } from "./pages/ShowReport";
+import { ShowsPage } from "./pages/Shows";
+import { StatsPage } from "./pages/Stats";
+import { TrackDetailPage } from "./pages/TrackDetail";
 import { PlayerProvider } from "./player/PlayerContext";
-import { match, useRoute, type Route } from "./router/router";
+import { Link, match, useRoute, type Route } from "./router/router";
+import { ShowProvider } from "./show/ShowContext";
+import { HistoryProvider } from "./stats/HistoryContext";
 
 function Page({ route }: { route: Route }) {
   const { path, params } = route;
-  if (path === "/") return <Home />;
-  if (path === "/buscar")
-    return <Search initialQuery={params.get("q") ?? ""} />;
-  if (path === "/biblioteca") return <LibraryPage />;
-  if (path === "/curtidas") return <LikedPage />;
-  if (path === "/fila") return <QueuePage />;
+  switch (path) {
+    case "/":
+      return <Home />;
+    case "/buscar":
+      return <Search initialQuery={params.get("q") ?? ""} />;
+    case "/biblioteca":
+      return <LibraryPage />;
+    case "/curtidas":
+      return <LikedPage />;
+    case "/fila":
+      return <QueuePage />;
+    case "/suas-musicas":
+      return <LocalMusicPage />;
+    case "/shows":
+      return <ShowsPage />;
+    case "/show/ao-vivo":
+      return <LiveShowPage />;
+    case "/estatisticas":
+      return <StatsPage />;
+    case "/configuracoes":
+      return <SettingsPage />;
+  }
 
   let found: Record<string, string> | null;
   if ((found = match("/album/:id", path))) return <AlbumPage id={found.id!} />;
@@ -37,13 +64,18 @@ function Page({ route }: { route: Route }) {
   if ((found = match("/genero/:tag", path)))
     return <GenrePage tag={found.tag!} />;
   if ((found = match("/playlist/:id", path)))
-    return <PlaylistPage id={found.id!} />;
+    return <PlaylistPage key={found.id} id={found.id!} />;
+  if ((found = match("/faixa/:id", path)))
+    return <TrackDetailPage key={found.id} id={found.id!} />;
+  if ((found = match("/show/:id", path)))
+    return <ShowReportPage id={found.id!} />;
   return <Empty>Página não encontrada.</Empty>;
 }
 
 function Shell() {
   const route = useRoute();
   const mainRef = useRef<HTMLElement>(null);
+  const liveShow = route.path === "/show/ao-vivo";
 
   // Each navigation starts at the top, like a new page would.
   useEffect(() => {
@@ -51,7 +83,7 @@ function Shell() {
   }, [route.path]);
 
   return (
-    <div className="app">
+    <div className={`app ${liveShow ? "is-live-show" : ""}`}>
       <Sidebar path={route.path} />
       <main className="main" ref={mainRef}>
         <div className="topbar">
@@ -63,19 +95,14 @@ function Shell() {
           >
             <BackIcon />
           </button>
-          {!clientIdFromEnv() && (
-            <button
-              type="button"
-              className="button-text topbar-reset"
-              title="Trocar o Client ID do Jamendo"
-              onClick={() => {
-                clearClientId();
-                window.location.reload();
-              }}
-            >
-              Trocar Client ID
-            </button>
-          )}
+          <Link
+            to="/configuracoes"
+            className="icon-button topbar-settings"
+            title="Configurações"
+          >
+            <SettingsIcon />
+            <span className="visually-hidden">Configurações</span>
+          </Link>
         </div>
         <Page route={route} />
       </main>
@@ -86,15 +113,23 @@ function Shell() {
 }
 
 export function App() {
-  const [hasClientId, setHasClientId] = useState(() => getClientId() !== "");
-  if (!hasClientId) return <Setup onDone={() => setHasClientId(true)} />;
+  const [ready, setReady] = useState(() => setupDone() || getClientId() !== "");
+  if (!ready) return <Setup onDone={() => setReady(true)} />;
   return (
     <ToastProvider>
-      <LibraryProvider>
-        <PlayerProvider>
-          <Shell />
-        </PlayerProvider>
-      </LibraryProvider>
+      <LocalProvider>
+        <LibraryProvider>
+          <PlayerProvider>
+            <ShowProvider>
+              <HistoryProvider>
+                <EditorProvider>
+                  <Shell />
+                </EditorProvider>
+              </HistoryProvider>
+            </ShowProvider>
+          </PlayerProvider>
+        </LibraryProvider>
+      </LocalProvider>
     </ToastProvider>
   );
 }

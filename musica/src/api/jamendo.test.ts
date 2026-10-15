@@ -38,6 +38,7 @@ describe("toTrack", () => {
   it("maps Jamendo fields", () => {
     expect(toTrack(rawTrack)).toEqual({
       id: "168",
+      source: "jamendo",
       title: "Proud",
       artist: "Both",
       artistId: "7",

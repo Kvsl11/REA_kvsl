@@ -125,6 +125,7 @@ export function toTrack(raw: Record<string, unknown>): Track | null {
   if (id === "" || audioUrl === "") return null;
   return {
     id,
+    source: "jamendo",
     title: str(raw.name),
     artist: str(raw.artist_name),
     artistId: str(raw.artist_id),
@@ -248,4 +249,18 @@ export async function getArtist(
     tracks: compact(tracks.map(toTrack)),
     albums: compact(albums.map(toAlbum)),
   };
+}
+
+export async function getTrack(
+  id: string,
+  signal?: AbortSignal,
+): Promise<Track | null> {
+  const results = await request("tracks", { ...TRACK_DEFAULTS, id }, signal);
+  const first = results[0];
+  return first ? toTrack(first) : null;
+}
+
+/** False when the user chose to use only their own files. */
+export function hasJamendo(): boolean {
+  return getClientId() !== "";
 }
