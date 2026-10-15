@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getClientId } from "./api/jamendo";
+import { AnalysisProvider } from "./ai/AnalysisContext";
+import { AnalyzeUiProvider } from "./ai/AnalyzeUi";
 import { EditorProvider } from "./components/EditorContext";
 import { BackIcon, SettingsIcon } from "./components/Icons";
 import { PlayerBar } from "./components/PlayerBar";
@@ -12,6 +14,7 @@ import { LyricsProvider } from "./lyrics/LyricsContext";
 import { LyricsUiProvider } from "./lyrics/LyricsUi";
 import { AlbumPage } from "./pages/Album";
 import { ArtistPage } from "./pages/Artist";
+import { CifraPage } from "./pages/Cifra";
 import { GenrePage } from "./pages/Genre";
 import { Home } from "./pages/Home";
 import {
@@ -72,6 +75,8 @@ function Page({ route }: { route: Route }) {
     return <PlaylistPage key={found.id} id={found.id!} />;
   if ((found = match("/faixa/:id", path)))
     return <TrackDetailPage key={found.id} id={found.id!} />;
+  if ((found = match("/cifra/:id", path)))
+    return <CifraPage key={found.id} id={found.id!} />;
   if ((found = match("/letra/sincronizar/:id", path)))
     return <LyricsSyncPage key={found.id} id={found.id!} />;
   if ((found = match("/show/:id", path)))
@@ -135,7 +140,11 @@ export function App() {
                 <LyricsProvider>
                   <EditorProvider>
                     <LyricsUiProvider>
-                      <Shell />
+                      <AnalysisProvider>
+                        <AnalyzeUiProvider>
+                          <Shell />
+                        </AnalyzeUiProvider>
+                      </AnalysisProvider>
                     </LyricsUiProvider>
                   </EditorProvider>
                 </LyricsProvider>

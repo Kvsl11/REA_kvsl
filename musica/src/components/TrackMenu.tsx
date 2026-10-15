@@ -3,6 +3,7 @@ import type { Track } from "../api/types";
 import { useLibrary } from "../library/LibraryContext";
 import { usePlayer } from "../player/PlayerContext";
 import { navigate } from "../router/router";
+import { useAnalyze } from "../ai/AnalyzeUi";
 import { useLyricsEditor } from "../lyrics/LyricsUi";
 import { useEditor } from "./EditorContext";
 import { MoreIcon } from "./Icons";
@@ -28,6 +29,7 @@ export function TrackMenu({
   const toast = useToast();
   const edit = useEditor();
   const editLyrics = useLyricsEditor();
+  const analyze = useAnalyze();
 
   useEffect(() => {
     if (!open) return;
@@ -133,6 +135,24 @@ export function TrackMenu({
                     {track.source === "local"
                       ? "Editar informações"
                       : "Informações de show (tom, BPM)"}
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => act(() => analyze(track))}
+                  >
+                    Analisar com IA (letra, BPM, cifra)…
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() =>
+                      act(() =>
+                        navigate(`/cifra/${encodeURIComponent(track.id)}`),
+                      )
+                    }
+                  >
+                    Cifra
                   </button>
                   <button
                     type="button"

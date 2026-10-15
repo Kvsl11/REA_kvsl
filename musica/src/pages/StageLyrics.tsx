@@ -4,6 +4,9 @@ import { useLocal } from "../local/LocalContext";
 import { useTrackLyrics } from "../lyrics/LyricsContext";
 import { LyricsView } from "../lyrics/LyricsView";
 import { usePlayer } from "../player/PlayerContext";
+import { useAnalysis } from "../ai/AnalysisContext";
+import { buildChart } from "../ai/chart";
+import { ChartView, ChordNow } from "./Cifra";
 import type * as S from "../show/session";
 
 function usePreference(
@@ -73,6 +76,13 @@ export function StageLyrics({
     [startedAt],
   );
   const getTime = playing ? player.getTime : follow ? songClock : null;
+  const analysis = useAnalysis(entry.trackId);
+  const [cifra, setCifra] = usePreference("sonora.stageCifra", true);
+  const chart = useMemo(
+    () =>
+      analysis && cifra ? buildChart(lyrics.lines, analysis.chords) : null,
+    [analysis, cifra, lyrics.lines],
+  );
 
   return (
     <div className="stage-lyrics">
@@ -85,6 +95,16 @@ export function StageLyrics({
         >
           Letra
         </button>
+        {analysis && (
+          <button
+            type="button"
+            className={`chip-button ${cifra ? "is-active" : ""}`}
+            aria-pressed={cifra}
+            onClick={() => setCifra(!cifra)}
+          >
+            Cifra
+          </button>
+        )}
         {show && !playing && lyrics.lines.length > 0 && (
           <button
             type="button"
@@ -97,7 +117,18 @@ export function StageLyrics({
           </button>
         )}
       </div>
-      {show &&
+      {analysis && cifra && (
+        <ChordNow chords={analysis.chords} getTime={getTime} transpose={0} />
+      )}
+      {show && chart && chart.length > 0 ? (
+        <ChartView
+          key={entry.startedAt}
+          chart={chart}
+          getTime={getTime}
+          variant="stage"
+        />
+      ) : (
+        show &&
         (lyrics.record && lyrics.plain ? (
           <LyricsView
             key={entry.startedAt}
@@ -114,7 +145,8 @@ export function StageLyrics({
               ? "Procurando a letra…"
               : "Sem letra para esta música. Adicione pelo menu ⋯ → Letra."}
           </p>
-        ))}
+        ))
+      )}
     </div>
   );
 }

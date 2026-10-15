@@ -13,7 +13,12 @@ import * as db from "../db/db";
 import { isLrc, lrcToPlain, parseLrc, type LyricLine } from "./lrc";
 import { findLyrics, LyricsLookupError } from "./lrclib";
 
-export type LyricsSource = "lrclib" | "manual" | "arquivo" | "sincronizada";
+export type LyricsSource =
+  | "lrclib"
+  | "manual"
+  | "arquivo"
+  | "sincronizada"
+  | "ia";
 
 export interface LyricsRecord {
   trackId: string;

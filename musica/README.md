@@ -42,6 +42,31 @@ tocou. Toca arquivos do seu aparelho e, opcionalmente, o catálogo livre do
   (playback) ou o cronômetro da música (ao vivo).
 - As letras pertencem aos seus autores; use para estudo e apresentação.
 
+### Análise com IA (letra, BPM, tom e cifra)
+
+No menu ⋯ de qualquer música: **Analisar com IA**. Tudo roda **no seu
+aparelho**, sem servidor, sem chave de API e sem enviar a música a ninguém.
+
+- **BPM, tom e acordes**: algoritmos de análise de áudio leem o andamento,
+  o tom e a sequência de acordes (maiores e menores).
+- **Cifra**: os acordes aparecem em cima das palavras da letra sincronizada,
+  com **transposição** (meio em meio tom), acorde atual e próximo em
+  destaque enquanto a música toca, e exportação em `.txt`.
+- **Letra pela voz** com o modelo **Whisper** (OpenAI, código aberto),
+  rodando no navegador:
+  - _Sincronizar a letra com a voz_: usa a letra que você já tem (do
+    LRCLIB, colada ou importada) e descobre quando cada linha é cantada. É o
+    modo mais preciso;
+  - _Reconhecer a letra pela voz_: escreve a letra ouvindo a música (revise:
+    com instrumentos altos, a IA erra palavras).
+- No primeiro uso o modelo de voz é baixado uma vez (~80 MB no modo
+  rápido, ~250 MB no preciso) e fica guardado no navegador. Funciona melhor
+  em computador ou celular recente; em navegadores com WebGPU (Chrome,
+  Edge) é bem mais rápido.
+- Você revisa o resultado antes de salvar (BPM pode ser ajustado em ÷2/×2).
+- No **modo show**, o acorde atual e o próximo aparecem em letra grande, com
+  a cifra rolando junto.
+
 ### Suas músicas
 
 - **Importe arquivos** (MP3, M4A, FLAC, WAV, OGG, OPUS…) pelo botão ou
@@ -147,7 +172,10 @@ npm test            # lógica: fila, show, estatísticas, importação, backup
 npm run test:e2e    # o app inteiro num navegador Chromium de verdade
 ```
 
-O teste de navegador importa arquivos de áudio gerados, edita dados, monta
+Os testes de navegador cobrem também a análise com IA numa música
+sintetizada (acordes C–G–Am–F a 100 BPM): BPM, tom e acordes são
+detectados de verdade; só o modelo de voz é simulado, porque baixar o
+Whisper real não cabe num teste automático. O teste de navegador importa arquivos de áudio gerados, edita dados, monta
 um setlist, grava um show ao vivo (avançando o relógio) e um show em
 playback, confere relatório, planilha, estatísticas e backup. Ele usa
 respostas de exemplo no lugar do Jamendo, então roda sem internet. Para

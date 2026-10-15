@@ -9,9 +9,10 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "vite build && node e2e/smoke.mjs && node e2e/lyrics.mjs"
+    "test:e2e": "vite build && node e2e/smoke.mjs && node e2e/lyrics.mjs && node e2e/ai.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "4.3.1",
     "music-metadata": "12.2.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"

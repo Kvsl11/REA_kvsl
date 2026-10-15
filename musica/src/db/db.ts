@@ -5,7 +5,7 @@
  */
 
 const DB_NAME = "sonora";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 export type StoreName =
   | "localTracks"
@@ -13,7 +13,8 @@ export type StoreName =
   | "trackInfo"
   | "plays"
   | "shows"
-  | "lyrics";
+  | "lyrics"
+  | "analysis";
 
 let opening: Promise<IDBDatabase> | null = null;
 
@@ -57,6 +58,10 @@ export function openDb(): Promise<IDBDatabase> {
       // Version 2: lyrics, keyed by track id.
       if (!db.objectStoreNames.contains("lyrics")) {
         db.createObjectStore("lyrics", { keyPath: "trackId" });
+      }
+      // Version 3: AI analysis (BPM, key, chords), keyed by track id.
+      if (!db.objectStoreNames.contains("analysis")) {
+        db.createObjectStore("analysis", { keyPath: "trackId" });
       }
       if (!db.objectStoreNames.contains("shows")) {
         const shows = db.createObjectStore("shows", { keyPath: "id" });

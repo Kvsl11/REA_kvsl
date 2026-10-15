@@ -1,7 +1,7 @@
 import { getTrack, hasJamendo } from "../api/jamendo";
 import type { Track } from "../api/types";
 import { useEditor } from "../components/EditorContext";
-import { EditIcon, PauseIcon, PlayIcon } from "../components/Icons";
+import { EditIcon, PauseIcon, PlayIcon, SparkIcon } from "../components/Icons";
 import { ArtistLink } from "../components/TrackList";
 import { TrackMenu } from "../components/TrackMenu";
 import { Cover } from "../components/Cover";
@@ -19,6 +19,7 @@ import { usePlayer } from "../player/PlayerContext";
 import { Link, navigate } from "../router/router";
 import { useTrackLyrics } from "../lyrics/LyricsContext";
 import { useLyricsEditor } from "../lyrics/LyricsUi";
+import { useAnalyze } from "../ai/AnalyzeUi";
 import { useShow } from "../show/ShowContext";
 import { useHistory } from "../stats/HistoryContext";
 import { trackHistory } from "../stats/plays";
@@ -82,6 +83,7 @@ function TrackDetail({ track }: { track: Track }) {
   const player = usePlayer();
   const local = useLocal();
   const edit = useEditor();
+  const analyze = useAnalyze();
   const record =
     track.source === "local" ? local.getRecord(track.id) : undefined;
   const info = local.info(track.id);
@@ -133,6 +135,20 @@ function TrackDetail({ track }: { track: Track }) {
         >
           <EditIcon size={16} />{" "}
           {record ? "Editar informações" : "Informações de show"}
+        </button>
+        <button
+          type="button"
+          className="button-outline"
+          onClick={() => analyze(track)}
+        >
+          <SparkIcon size={16} /> Analisar com IA
+        </button>
+        <button
+          type="button"
+          className="button-text"
+          onClick={() => navigate(`/cifra/${encodeURIComponent(track.id)}`)}
+        >
+          Cifra
         </button>
         <TrackMenu track={track} />
       </div>

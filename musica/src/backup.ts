@@ -1,5 +1,6 @@
 import * as db from "./db/db";
 import type { LibraryData } from "./library/LibraryContext";
+import type { AnalysisRecord } from "./ai/AnalysisContext";
 import type { LyricsRecord } from "./lyrics/LyricsContext";
 import type { TrackInfo } from "./local/LocalContext";
 import type { LocalTrackRecord } from "./local/importer";
@@ -18,6 +19,7 @@ export interface Backup {
   plays: PlayRecord[];
   shows: ShowSession[];
   lyrics: LyricsRecord[];
+  analysis: AnalysisRecord[];
   localTracks: LocalTrackRecord[];
   /** Audio as data: URLs keyed by track id; only when the user opts in. */
   audio: Record<string, string>;
@@ -42,13 +44,15 @@ export async function createBackup(
   library: LibraryData,
   includeAudio: boolean,
 ): Promise<Backup> {
-  const [trackInfo, plays, shows, lyrics, localTracks] = await Promise.all([
-    db.getAll<TrackInfo>("trackInfo"),
-    db.getAll<PlayRecord>("plays"),
-    db.getAll<ShowSession>("shows"),
-    db.getAll<LyricsRecord>("lyrics"),
-    db.getAll<LocalTrackRecord>("localTracks"),
-  ]);
+  const [trackInfo, plays, shows, lyrics, analysis, localTracks] =
+    await Promise.all([
+      db.getAll<TrackInfo>("trackInfo"),
+      db.getAll<PlayRecord>("plays"),
+      db.getAll<ShowSession>("shows"),
+      db.getAll<LyricsRecord>("lyrics"),
+      db.getAll<AnalysisRecord>("analysis"),
+      db.getAll<LocalTrackRecord>("localTracks"),
+    ]);
   const audio: Record<string, string> = {};
   if (includeAudio) {
     for (const record of localTracks) {
@@ -65,6 +69,7 @@ export async function createBackup(
     plays,
     shows,
     lyrics,
+    analysis,
     // Without the audio the file records would point at nothing.
     localTracks: includeAudio
       ? localTracks.filter((record) => audio[record.id])
@@ -109,6 +114,9 @@ export function parseBackup(text: string): Backup {
     lyrics: list<LyricsRecord>(data.lyrics).filter(
       (item) => typeof item?.trackId === "string",
     ),
+    analysis: list<AnalysisRecord>(data.analysis).filter(
+      (item) => typeof item?.trackId === "string" && Array.isArray(item.chords),
+    ),
     localTracks: list<LocalTrackRecord>(data.localTracks).filter(
       (item) => typeof item?.id === "string",
     ),
@@ -144,6 +152,7 @@ export async function restoreBackup(
     ...backup.plays.map((value) => ({ store: "plays" as const, value })),
     ...backup.shows.map((value) => ({ store: "shows" as const, value })),
     ...backup.lyrics.map((value) => ({ store: "lyrics" as const, value })),
+    ...backup.analysis.map((value) => ({ store: "analysis" as const, value })),
   ]);
   return { audioRestored };
 }

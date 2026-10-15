@@ -3586,3 +3586,274 @@ code {
     grid-column: 2;
   }
 }
+
+/* =========================================================
+   AI analysis and chord charts
+   ========================================================= */
+
+.edit-form select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid #3e3e3e;
+  border-radius: 6px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.ai-stages {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-stages li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-subtle);
+  flex-wrap: wrap;
+}
+
+.ai-stages li.is-now {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.ai-stages li.is-done {
+  color: var(--text-muted);
+}
+
+.ai-stage-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  color: var(--accent);
+}
+
+.ai-stage-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-basis: 100%;
+  margin-left: 30px;
+}
+
+.ai-stage-progress > span {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+  max-width: 260px;
+  min-width: 2px;
+}
+
+.ai-stage-progress small {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ai-result .stat-cards {
+  margin-top: 0;
+}
+
+.ai-pick {
+  position: relative;
+  cursor: pointer;
+}
+
+.ai-pick input {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  accent-color: var(--accent);
+}
+
+.ai-chords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ai-chords .chip {
+  margin: 0;
+}
+
+.ai-lyrics {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Current / next chord */
+.chord-now {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  margin: 4px 0 12px;
+}
+
+.chord-now small {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.chord-now-current {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.chord-now-next {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+/* Chart page */
+.cifra-page .lyrics-header .play-fab {
+  margin-left: auto;
+}
+
+.cifra-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 4px 0 16px;
+}
+
+.cifra-fact {
+  display: flex;
+  flex-direction: column;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.cifra-fact small {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.cifra-fact em {
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  color: var(--text-muted);
+}
+
+.chart {
+  overflow-y: auto;
+  max-height: calc(100dvh - var(--player-height) - var(--bottom-nav-height) - 300px);
+  min-height: 240px;
+  padding: 8px 0;
+  scrollbar-width: thin;
+}
+
+.chart-line {
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  transition: background 0.2s;
+}
+
+.chart-line.is-active {
+  background: rgb(30 215 96 / 0.1);
+}
+
+.chart pre {
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 17px;
+  line-height: 1.35;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.chart-chords {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.chart-text {
+  color: var(--text);
+}
+
+.chart-line.is-label p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.chart-label {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.chart-chord {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.chart-stage {
+  max-height: 46vh;
+}
+
+.chart-stage pre {
+  font-size: 24px;
+}
+
+.chart-stage .chart-line:not(.is-active) .chart-text {
+  color: rgb(255 255 255 / 0.55);
+}
+
+@media (max-width: 768px) {
+  .chart pre {
+    font-size: 14px;
+  }
+
+  .chart-stage pre {
+    font-size: 18px;
+  }
+
+  .chord-now-current {
+    font-size: 38px;
+  }
+}
+
+/* A checkbox row inside forms whose labels are otherwise stacked. */
+.edit-form .check-label,
+.panel .check-label {
+  flex-direction: row;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.edit-form .check-label input {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}

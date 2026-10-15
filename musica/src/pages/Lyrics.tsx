@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Track } from "../api/types";
 import { Cover } from "../components/Cover";
-import { EditIcon, LyricsIcon, SyncIcon } from "../components/Icons";
+import {
+  EditIcon,
+  GuitarIcon,
+  LyricsIcon,
+  SparkIcon,
+  SyncIcon,
+} from "../components/Icons";
+import { useAnalyze } from "../ai/AnalyzeUi";
 import { Empty, Loading } from "../components/Status";
 import { useToast } from "../components/Toast";
 import { formatTime } from "../format";
@@ -48,6 +55,8 @@ function sourceLabel(lyrics: TrackLyrics): string {
       return "Letra importada de arquivo";
     case "manual":
       return "Letra adicionada por você";
+    case "ia":
+      return "Sincronizada pela IA — toque numa linha fora do tempo para conferir";
     default:
       return "";
   }
@@ -63,6 +72,7 @@ export function LyricsMissing({
 }) {
   const store = useLyricsStore();
   const openEditor = useLyricsEditor();
+  const analyze = useAnalyze();
   return (
     <div className="lyrics-empty">
       <LyricsIcon size={40} />
@@ -89,6 +99,13 @@ export function LyricsMissing({
           onClick={() => openEditor(track, "write")}
         >
           Colar ou importar
+        </button>
+        <button
+          type="button"
+          className="button-outline"
+          onClick={() => analyze(track)}
+        >
+          <SparkIcon size={16} /> Reconhecer com IA
         </button>
         <button
           type="button"
@@ -220,6 +237,13 @@ function TrackLyricsPage({ track }: { track: Track }) {
               <SyncIcon size={16} /> {synced ? "Ressincronizar" : "Sincronizar"}
             </button>
           )}
+          <button
+            type="button"
+            className="button-outline button-small"
+            onClick={() => navigate(`/cifra/${encodeURIComponent(track.id)}`)}
+          >
+            <GuitarIcon size={16} /> Cifra
+          </button>
           <button
             type="button"
             className="button-outline button-small"

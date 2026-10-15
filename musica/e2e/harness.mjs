@@ -224,8 +224,26 @@ function lrclib(url) {
   return { status: 200, json: entries };
 }
 
-export async function newPage(viewport, { clock = false } = {}) {
+export let modelRequests = 0;
+
+/**
+ * `fakeTranscriber`: words the "speech model" will return, so tests don't
+ * download a real model (the app reads it from a documented test seam).
+ */
+export async function newPage(
+  viewport,
+  { clock = false, fakeTranscriber = null } = {},
+) {
   const context = await browser.newContext({ viewport, acceptDownloads: true });
+  if (fakeTranscriber) {
+    await context.addInitScript((words) => {
+      window.__sonoraFakeTranscriber = async () => words;
+    }, fakeTranscriber);
+  }
+  await context.route(/huggingface\.co|hf\.co/, (route) => {
+    modelRequests++;
+    return route.abort();
+  });
   await context.route("https://api.jamendo.com/**", (route) => {
     jamendoRequests++;
     return route.fulfill({ json: jamendo(new URL(route.request().url())) });
@@ -296,4 +314,101 @@ export async function finish(failure) {
     await browser.close();
     await server.close();
   }
+}
+
+const NOTE_INDEX = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
+const CHORD_NOTES = {
+  C: [
+    ["C", 3],
+    ["E", 3],
+    ["G", 3],
+    ["C", 4],
+  ],
+  G: [
+    ["G", 2],
+    ["B", 2],
+    ["D", 3],
+    ["G", 3],
+  ],
+  Am: [
+    ["A", 2],
+    ["C", 3],
+    ["E", 3],
+    ["A", 3],
+  ],
+  F: [
+    ["F", 2],
+    ["A", 2],
+    ["C", 3],
+    ["F", 3],
+  ],
+};
+
+/**
+ * A synthesized "band" as a WAV file: sustained chords with harmonics and
+ * a kick drum on every beat, so tempo, key and chord detection have
+ * something real to analyze.
+ */
+export function songWav(progression, secondsPerChord, bpm, rate = 22050) {
+  const total = Math.round(progression.length * secondsPerChord * rate);
+  const samples = new Float32Array(total);
+  progression.forEach((name, index) => {
+    const start = Math.round(index * secondsPerChord * rate);
+    const length = Math.round(secondsPerChord * rate);
+    for (const [note, octave] of CHORD_NOTES[name]) {
+      const frequency =
+        440 * 2 ** ((NOTE_INDEX.indexOf(note) - 9) / 12 + (octave - 4));
+      for (let i = 0; i < length; i++) {
+        const t = i / rate;
+        const envelope = Math.min(1, t * 50) * Math.exp(-t * 0.4);
+        samples[start + i] +=
+          0.08 *
+          envelope *
+          (Math.sin(2 * Math.PI * frequency * t) +
+            0.4 * Math.sin(4 * Math.PI * frequency * t) +
+            0.2 * Math.sin(6 * Math.PI * frequency * t));
+      }
+    }
+  });
+  for (let time = 0; time < total / rate; time += 60 / bpm) {
+    const start = Math.round(time * rate);
+    for (let i = 0; i < 0.08 * rate && start + i < total; i++) {
+      const t = i / rate;
+      samples[start + i] +=
+        0.6 * Math.exp(-t * 40) * Math.sin(2 * Math.PI * 60 * t);
+    }
+  }
+  const buffer = Buffer.alloc(44 + total * 2);
+  buffer.write("RIFF", 0);
+  buffer.writeUInt32LE(36 + total * 2, 4);
+  buffer.write("WAVEfmt ", 8);
+  buffer.writeUInt32LE(16, 16);
+  buffer.writeUInt16LE(1, 20);
+  buffer.writeUInt16LE(1, 22);
+  buffer.writeUInt32LE(rate, 24);
+  buffer.writeUInt32LE(rate * 2, 28);
+  buffer.writeUInt16LE(2, 32);
+  buffer.writeUInt16LE(16, 34);
+  buffer.write("data", 36);
+  buffer.writeUInt32LE(total * 2, 40);
+  for (let i = 0; i < total; i++) {
+    buffer.writeInt16LE(
+      Math.max(-32768, Math.min(32767, Math.round(samples[i] * 32767))),
+      44 + i * 2,
+    );
+  }
+  return buffer;
 }
