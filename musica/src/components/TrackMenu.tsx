@@ -3,6 +3,7 @@ import type { Track } from "../api/types";
 import { useLibrary } from "../library/LibraryContext";
 import { usePlayer } from "../player/PlayerContext";
 import { navigate } from "../router/router";
+import { useLyricsEditor } from "../lyrics/LyricsUi";
 import { useEditor } from "./EditorContext";
 import { MoreIcon } from "./Icons";
 import { useToast } from "./Toast";
@@ -26,6 +27,7 @@ export function TrackMenu({
   const library = useLibrary();
   const toast = useToast();
   const edit = useEditor();
+  const editLyrics = useLyricsEditor();
 
   useEffect(() => {
     if (!open) return;
@@ -131,6 +133,13 @@ export function TrackMenu({
                     {track.source === "local"
                       ? "Editar informações"
                       : "Informações de show (tom, BPM)"}
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => act(() => editLyrics(track))}
+                  >
+                    Letra…
                   </button>
                   <button
                     type="button"

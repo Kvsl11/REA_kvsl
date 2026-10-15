@@ -47,6 +47,8 @@ interface PlayerApi {
   next: () => void;
   previous: () => void;
   seek: (seconds: number) => void;
+  /** Exact playback position right now (position updates only ~4×/s). */
+  getTime: () => number;
   setVolume: (volume: number) => void;
   toggleMute: () => void;
   toggleShuffle: () => void;
@@ -312,6 +314,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setState(prev);
         setPlayToken((token) => token + 1);
       },
+      getTime: () => audio?.currentTime ?? 0,
       seek: (seconds) => {
         if (!audio) return;
         audio.currentTime = seconds;

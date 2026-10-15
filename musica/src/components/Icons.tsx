@@ -99,3 +99,9 @@ export const CoffeeIcon = icon(
   "M3 7h14v6a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6zm14 1h1.5a3 3 0 0 1 0 6H17v-2h1.5a1 1 0 0 0 0-2H17zM3 21h16v2H3zM8 1h2v4H8zm4 0h2v4h-2z",
 );
 export const CheckIcon = icon("M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z");
+export const LyricsIcon = icon(
+  "M4 5h11v2H4zm0 4h16v2H4zm0 4h9v2H4zm0 4h13v2H4zm14.5-4.5a2.5 2.5 0 1 1-1.5 4.5V11h4v1.5h-2.5z",
+);
+export const SyncIcon = icon(
+  "M12 4V1L8 5l4 4V6a6 6 0 0 1 5.7 7.9l1.5 1.5A8 8 0 0 0 12 4zm0 14a6 6 0 0 1-5.7-7.9L4.8 8.6A8 8 0 0 0 12 20v3l4-4-4-4z",
+);

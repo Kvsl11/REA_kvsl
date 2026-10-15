@@ -2,10 +2,13 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { formatTime } from "../format";
 import { useLibrary } from "../library/LibraryContext";
 import { usePlayer } from "../player/PlayerContext";
-import { Link, navigate } from "../router/router";
+import { useTrackLyrics } from "../lyrics/LyricsContext";
+import { LyricsView } from "../lyrics/LyricsView";
+import { Link, navigate, useRoute } from "../router/router";
 import { Cover } from "./Cover";
 import { ArtistLink } from "./TrackList";
 import {
+  LyricsIcon,
   ChevronDownIcon,
   HeartIcon,
   HeartOutlineIcon,
@@ -168,17 +171,30 @@ function NowPlaying({ onClose }: { onClose: () => void }) {
           <ChevronDownIcon size={28} />
         </button>
         <span>Tocando agora</span>
-        <button
-          type="button"
-          className="icon-button"
-          aria-label="Fila"
-          onClick={() => {
-            onClose();
-            navigate("/fila");
-          }}
-        >
-          <QueueIcon />
-        </button>
+        <span className="now-playing-actions">
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Letra"
+            onClick={() => {
+              onClose();
+              navigate("/letra");
+            }}
+          >
+            <LyricsIcon />
+          </button>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Fila"
+            onClick={() => {
+              onClose();
+              navigate("/fila");
+            }}
+          >
+            <QueueIcon />
+          </button>
+        </span>
       </div>
       <Cover
         src={track.cover}
@@ -200,7 +216,60 @@ function NowPlaying({ onClose }: { onClose: () => void }) {
       </div>
       <SeekBar />
       <Controls large />
+      <NowPlayingLyrics onOpen={onClose} />
     </div>
+  );
+}
+
+/** Lyrics card under the controls, as in Spotify's mobile player. */
+function NowPlayingLyrics({ onOpen }: { onOpen: () => void }) {
+  const player = usePlayer();
+  const lyrics = useTrackLyrics(player.track);
+  if (!lyrics.record || (lyrics.record.instrumental && !lyrics.plain))
+    return null;
+  return (
+    <section className="now-playing-lyrics">
+      <header>
+        <strong>Letra</strong>
+        <button
+          type="button"
+          className="button-small button-outline"
+          onClick={() => {
+            onOpen();
+            navigate("/letra");
+          }}
+        >
+          Mostrar tudo
+        </button>
+      </header>
+      <LyricsView
+        lines={lyrics.lines}
+        plain={lyrics.plain}
+        offsetMs={lyrics.offsetMs}
+        getTime={player.getTime}
+        variant="card"
+      />
+    </section>
+  );
+}
+
+/** Opens the lyrics page, or goes back when already on it. */
+function LyricsToggle() {
+  const route = useRoute();
+  const player = usePlayer();
+  const open = route.path === "/letra";
+  return (
+    <button
+      type="button"
+      className={`icon-button ${open ? "is-on" : ""}`}
+      aria-label="Letra"
+      aria-pressed={open}
+      title="Letra"
+      disabled={!player.track}
+      onClick={() => (open ? window.history.back() : navigate("/letra"))}
+    >
+      <LyricsIcon />
+    </button>
   );
 }
 
@@ -252,6 +321,7 @@ export function PlayerBar() {
           )}
         </div>
         <div className="player-side">
+          <LyricsToggle />
           <Link to="/fila" className="icon-button" title="Fila">
             <QueueIcon />
             <span className="visually-hidden">Fila</span>

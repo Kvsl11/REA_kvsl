@@ -8,6 +8,8 @@ import { Empty } from "./components/Status";
 import { ToastProvider } from "./components/Toast";
 import { LibraryProvider } from "./library/LibraryContext";
 import { LocalProvider } from "./local/LocalContext";
+import { LyricsProvider } from "./lyrics/LyricsContext";
+import { LyricsUiProvider } from "./lyrics/LyricsUi";
 import { AlbumPage } from "./pages/Album";
 import { ArtistPage } from "./pages/Artist";
 import { GenrePage } from "./pages/Genre";
@@ -19,6 +21,7 @@ import {
   QueuePage,
 } from "./pages/Library";
 import { LiveShowPage } from "./pages/LiveShow";
+import { LyricsPage, LyricsSyncPage } from "./pages/Lyrics";
 import { LocalMusicPage } from "./pages/LocalMusic";
 import { Search } from "./pages/Search";
 import { SettingsPage } from "./pages/Settings";
@@ -55,6 +58,8 @@ function Page({ route }: { route: Route }) {
       return <StatsPage />;
     case "/configuracoes":
       return <SettingsPage />;
+    case "/letra":
+      return <LyricsPage />;
   }
 
   let found: Record<string, string> | null;
@@ -67,6 +72,8 @@ function Page({ route }: { route: Route }) {
     return <PlaylistPage key={found.id} id={found.id!} />;
   if ((found = match("/faixa/:id", path)))
     return <TrackDetailPage key={found.id} id={found.id!} />;
+  if ((found = match("/letra/sincronizar/:id", path)))
+    return <LyricsSyncPage key={found.id} id={found.id!} />;
   if ((found = match("/show/:id", path)))
     return <ShowReportPage id={found.id!} />;
   return <Empty>Página não encontrada.</Empty>;
@@ -76,6 +83,7 @@ function Shell() {
   const route = useRoute();
   const mainRef = useRef<HTMLElement>(null);
   const liveShow = route.path === "/show/ao-vivo";
+  const lyricsPage = route.path === "/letra";
 
   // Each navigation starts at the top, like a new page would.
   useEffect(() => {
@@ -83,7 +91,9 @@ function Shell() {
   }, [route.path]);
 
   return (
-    <div className={`app ${liveShow ? "is-live-show" : ""}`}>
+    <div
+      className={`app ${liveShow ? "is-live-show" : ""} ${lyricsPage ? "is-lyrics" : ""}`}
+    >
       <Sidebar path={route.path} />
       <main className="main" ref={mainRef}>
         <div className="topbar">
@@ -122,9 +132,13 @@ export function App() {
           <PlayerProvider>
             <ShowProvider>
               <HistoryProvider>
-                <EditorProvider>
-                  <Shell />
-                </EditorProvider>
+                <LyricsProvider>
+                  <EditorProvider>
+                    <LyricsUiProvider>
+                      <Shell />
+                    </LyricsUiProvider>
+                  </EditorProvider>
+                </LyricsProvider>
               </HistoryProvider>
             </ShowProvider>
           </PlayerProvider>

@@ -1,5 +1,6 @@
 import * as db from "./db/db";
 import type { LibraryData } from "./library/LibraryContext";
+import type { LyricsRecord } from "./lyrics/LyricsContext";
 import type { TrackInfo } from "./local/LocalContext";
 import type { LocalTrackRecord } from "./local/importer";
 import type { ShowSession } from "./show/session";
@@ -16,6 +17,7 @@ export interface Backup {
   trackInfo: TrackInfo[];
   plays: PlayRecord[];
   shows: ShowSession[];
+  lyrics: LyricsRecord[];
   localTracks: LocalTrackRecord[];
   /** Audio as data: URLs keyed by track id; only when the user opts in. */
   audio: Record<string, string>;
@@ -40,10 +42,11 @@ export async function createBackup(
   library: LibraryData,
   includeAudio: boolean,
 ): Promise<Backup> {
-  const [trackInfo, plays, shows, localTracks] = await Promise.all([
+  const [trackInfo, plays, shows, lyrics, localTracks] = await Promise.all([
     db.getAll<TrackInfo>("trackInfo"),
     db.getAll<PlayRecord>("plays"),
     db.getAll<ShowSession>("shows"),
+    db.getAll<LyricsRecord>("lyrics"),
     db.getAll<LocalTrackRecord>("localTracks"),
   ]);
   const audio: Record<string, string> = {};
@@ -61,6 +64,7 @@ export async function createBackup(
     trackInfo,
     plays,
     shows,
+    lyrics,
     // Without the audio the file records would point at nothing.
     localTracks: includeAudio
       ? localTracks.filter((record) => audio[record.id])
@@ -101,6 +105,10 @@ export function parseBackup(text: string): Backup {
     shows: list<ShowSession>(data.shows).filter(
       (item) => typeof item?.id === "string" && Array.isArray(item.entries),
     ),
+    // Older backups have no lyrics.
+    lyrics: list<LyricsRecord>(data.lyrics).filter(
+      (item) => typeof item?.trackId === "string",
+    ),
     localTracks: list<LocalTrackRecord>(data.localTracks).filter(
       (item) => typeof item?.id === "string",
     ),
@@ -135,6 +143,7 @@ export async function restoreBackup(
     })),
     ...backup.plays.map((value) => ({ store: "plays" as const, value })),
     ...backup.shows.map((value) => ({ store: "shows" as const, value })),
+    ...backup.lyrics.map((value) => ({ store: "lyrics" as const, value })),
   ]);
   return { audioRestored };
 }

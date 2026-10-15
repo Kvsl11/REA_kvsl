@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { StageLyrics } from "./StageLyrics";
 import {
   CheckIcon,
   CoffeeIcon,
@@ -245,6 +246,7 @@ function NowPanel({
         </p>
       )}
       <StageInfo info={local.info(entry.trackId)} />
+      <StageLyrics session={session} entry={entry} />
     </section>
   );
 }

@@ -1,0 +1,64 @@
+# Builds the Sonora web app (musica/) and publishes it on GitHub Pages.
+# One-time setup: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# Optional: Settings → Secrets and variables → Actions → Variables →
+# JAMENDO_CLIENT_ID, to ship the site already connected to Jamendo.
+name: Publicar Sonora (GitHub Pages)
+
+on:
+  push:
+    branches: [ccr-babc83b4-674bz0]
+    paths:
+      - "musica/**"
+      - ".github/workflows/deploy-sonora.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a newer push waits instead of cancelling a deploy mid-way.
+concurrency:
+  group: pages-sonora
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: musica
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: musica/package-lock.json
+
+      - run: npm ci
+
+      - name: Testes
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_JAMENDO_CLIENT_ID: ${{ vars.JAMENDO_CLIENT_ID }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: musica/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

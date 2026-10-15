@@ -11,6 +11,7 @@ async function wipe() {
     "trackInfo",
     "plays",
     "shows",
+    "lyrics",
   ] as const) {
     await db.clear(store);
   }

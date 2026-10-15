@@ -26,6 +26,22 @@ tocou. Toca arquivos do seu aparelho e, opcionalmente, o catálogo livre do
 - **Relatório** de cada show, com anotações e exportação para planilha (CSV,
   abre no Excel).
 
+### Letras sincronizadas
+
+- **Letra que acompanha a música**, como no Spotify: a linha cantada fica em
+  destaque, a tela rola sozinha e tocar numa linha pula para aquele trecho.
+- A letra é **buscada automaticamente** no [LRCLIB](https://lrclib.net), uma
+  base aberta e gratuita com muitas letras já sincronizadas.
+- Não achou? **Busque à mão**, **cole a letra** ou **importe um arquivo
+  `.lrc`**.
+- **Sincronize você mesmo**: toque a música e aperte _Marcar_ (ou espaço) no
+  começo de cada linha; depois dá para ajustar cada linha em décimos de
+  segundo.
+- Ajuste fino de sincronia (mais cedo/mais tarde) e tamanho do texto.
+- No **modo show**, a letra aparece como teleprompter: segue o áudio
+  (playback) ou o cronômetro da música (ao vivo).
+- As letras pertencem aos seus autores; use para estudo e apresentação.
+
 ### Suas músicas
 
 - **Importe arquivos** (MP3, M4A, FLAC, WAV, OGG, OPUS…) pelo botão ou
@@ -58,6 +74,26 @@ tocou. Toca arquivos do seu aparelho e, opcionalmente, o catálogo livre do
 
 - Exporte tudo (playlists, setlists, shows, histórico, tom/BPM/notas e,
   se quiser, os arquivos de áudio) num arquivo e restaure em outro aparelho.
+
+## Usar pela web (GitHub Pages)
+
+O repositório já tem um workflow (`.github/workflows/deploy-sonora.yml`)
+que testa, compila e publica o app a cada push na pasta `musica/`.
+
+1. No GitHub, abra **Settings → Pages**.
+2. Em **Build and deployment → Source**, escolha **GitHub Actions**.
+3. Pronto: a cada push o app é publicado em
+   **https://kvsl11.github.io/Teste/** (veja o andamento na aba _Actions_).
+   Para publicar na hora sem push: _Actions → Publicar Sonora → Run workflow_.
+
+**Instalar no celular:** abra o endereço no Chrome (Android) e toque em
+_Adicionar à tela inicial_ / _Instalar app_; no iPhone, Safari → _Compartilhar →
+Adicionar à Tela de Início_. O app abre em tela cheia e funciona sem internet
+depois da primeira visita (as músicas importadas ficam no aparelho).
+
+**Jamendo já conectado no site (opcional):** em _Settings → Secrets and
+variables → Actions → Variables_, crie `JAMENDO_CLIENT_ID` com o seu Client
+ID. Ele fica visível no site publicado.
 
 ## Como rodar
 

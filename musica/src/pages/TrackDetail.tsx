@@ -16,14 +16,16 @@ import {
 import { useLibrary } from "../library/LibraryContext";
 import { useLocal } from "../local/LocalContext";
 import { usePlayer } from "../player/PlayerContext";
-import { Link } from "../router/router";
+import { Link, navigate } from "../router/router";
+import { useTrackLyrics } from "../lyrics/LyricsContext";
+import { useLyricsEditor } from "../lyrics/LyricsUi";
 import { useShow } from "../show/ShowContext";
 import { useHistory } from "../stats/HistoryContext";
 import { trackHistory } from "../stats/plays";
 import { useAsync } from "../useAsync";
 
 /** Finds a track wherever the app already knows it, before asking Jamendo. */
-function useKnownTrack(id: string): Track | null {
+export function useKnownTrack(id: string): Track | null {
   const local = useLocal();
   const library = useLibrary();
   const player = usePlayer();
@@ -173,6 +175,8 @@ function TrackDetail({ track }: { track: Track }) {
           )}
         </section>
 
+        <LyricsPanel track={track} />
+
         {record && (
           <section className="panel">
             <h2>Arquivo</h2>
@@ -276,6 +280,56 @@ function TrackStats({ id }: { id: string }) {
       ) : (
         <p className="empty">Ainda não foi tocada.</p>
       )}
+    </section>
+  );
+}
+
+function LyricsPanel({ track }: { track: Track }) {
+  const lyrics = useTrackLyrics(track);
+  const openEditor = useLyricsEditor();
+  const preview = lyrics.plain.split("\n").filter(Boolean).slice(0, 6);
+  return (
+    <section className="panel">
+      <h2>Letra</h2>
+      {lyrics.status === "loading" || lyrics.status === "searching" ? (
+        <p className="empty">Procurando a letra…</p>
+      ) : lyrics.record ? (
+        <>
+          <p className="field-hint">
+            {lyrics.lines.length > 0 ? "Sincronizada" : "Sem sincronia"}
+            {lyrics.record.source === "lrclib" && " • LRCLIB"}
+          </p>
+          <p className="lyrics-preview">
+            {preview.map((line, index) => (
+              <span key={index}>{line}</span>
+            ))}
+            {lyrics.plain.split("\n").filter(Boolean).length >
+              preview.length && <span>…</span>}
+          </p>
+        </>
+      ) : (
+        <p className="empty">Sem letra ainda.</p>
+      )}
+      <div className="button-row">
+        <button
+          type="button"
+          className="button-outline button-small"
+          onClick={() => openEditor(track, lyrics.record ? "write" : "search")}
+        >
+          {lyrics.record ? "Editar letra" : "Buscar letra"}
+        </button>
+        {lyrics.record && !lyrics.record.instrumental && (
+          <button
+            type="button"
+            className="button-text"
+            onClick={() =>
+              navigate(`/letra/sincronizar/${encodeURIComponent(track.id)}`)
+            }
+          >
+            {lyrics.lines.length > 0 ? "Ressincronizar" : "Sincronizar"}
+          </button>
+        )}
+      </div>
     </section>
   );
 }
